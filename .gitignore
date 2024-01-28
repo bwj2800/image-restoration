@@ -1,0 +1,5 @@
+result/
+datasets/
+__pycache__/
+venv/
+resnet_model.pth
