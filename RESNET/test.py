@@ -1,6 +1,6 @@
 MODEL_NAME = "resnet34_2"
-MODEL_PATH = 'result/model/'+MODEL_NAME+'.h5'
-DATA_PATH = 'datasets/validation/source'
+MODEL_PATH = '../result/model/'+MODEL_NAME+'.h5'
+DATA_PATH = '../datasets/validation/source'
 EPOCH = 100
 BATCH_SIZE = 16
 ACCURACY_RESULT=''
@@ -18,6 +18,7 @@ import torchvision.transforms as transforms
 from torchvision import models
 from tqdm import tqdm
 from loader import CustomImageFolder
+from PIL import Image
 
 # GPU 사용 여부 확인 및 설정
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -60,16 +61,12 @@ resnet_model.load_state_dict(torch.load(MODEL_PATH))
 resnet_model.to(device)
 resnet_model.eval()
 
-# # tensor image generate
-# images = test_transformer(Image.open('test_img/cat2.jpg')).view(1, 3, 224, 224)
-# images = images.to(device)
-# pred = resnet_model(images)
-# # pred_sigmoid = torch.sigmoid(pred)
-# # print(pred_sigmoid)
-# # pred_rounded = torch.round(pred_sigmoid)
-# pred_rounded = torch.round(pred)
-# tmp=pred_rounded.cpu().detach().numpy()[0]
-# print(tmp)
+# 개별 이미지 테스트
+images = transform(Image.open('datasets/validation/FF1.jpg')).view(1, 3, 224, 224)
+images = images.to(device)
+pred = resnet_model(images)
+_, predicted = torch.max(pred, 1)
+print(predicted)
 
 
 # 정확도 측정을 위한 변수 초기화

@@ -1,6 +1,6 @@
-MODEL_NAME = "resnet34_2"
-MODEL_PATH = 'result/model/'+MODEL_NAME+'.h5'
-DATA_PATH = 'datasets/training/source'
+MODEL_NAME = "resnet34_4"
+MODEL_PATH = '../result/model/'+MODEL_NAME+'.h5'
+DATA_PATH = '../datasets/training/source'
 EPOCH = 100
 BATCH_SIZE = 16
 
@@ -37,7 +37,7 @@ class_mapping = {
 #     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 # ])
 transform = transforms.Compose([
-    transforms.Resize((224,224)),
+    transforms.Resize(224),
     transforms.ToTensor(),
 ])
 
