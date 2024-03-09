@@ -34,12 +34,12 @@ def common_elements(list1, list2):
     return list(common_prefixes)
 
 # 디렉토리 경로 설정
-shake_directory_paths = ['/home/scar/Desktop/woojeong/final/datasets/training/source/bright_RL', '/home/scar/Desktop/woojeong/final/datasets/training/source/bright_UD', '/home/scar/Desktop/woojeong/final/datasets/training/source/dark_RL', '/home/scar/Desktop/woojeong/final/datasets/training/source/dark_UD']
-focus_directory_paths = ['/home/scar/Desktop/woojeong/final/datasets/training/source/bright_FF', '/home/scar/Desktop/woojeong/final/datasets/training/source/bright_RF', '/home/scar/Desktop/woojeong/final/datasets/training/source/dark_FF', '/home/scar/Desktop/woojeong/final/datasets/training/source/dark_RF']
-gt_directory_paths = ['/home/scar/Desktop/woojeong/final/datasets/training/bright_GT', '/home/scar/Desktop/woojeong/final/datasets/training/dark_GT']
+shake_directory_paths = ['/home/scar/Desktop/woojeong/final/datasets/validation/source/bright_RL', '/home/scar/Desktop/woojeong/final/datasets/validation/source/bright_UD', '/home/scar/Desktop/woojeong/final/datasets/validation/source/dark_RL', '/home/scar/Desktop/woojeong/final/datasets/validation/source/dark_UD']
+focus_directory_paths = ['/home/scar/Desktop/woojeong/final/datasets/validation/source/bright_FF', '/home/scar/Desktop/woojeong/final/datasets/validation/source/bright_RF', '/home/scar/Desktop/woojeong/final/datasets/validation/source/dark_FF', '/home/scar/Desktop/woojeong/final/datasets/validation/source/dark_RF']
+gt_directory_paths = ['/home/scar/Desktop/woojeong/final/datasets/validation/bright_GT', '/home/scar/Desktop/woojeong/final/datasets/validation/dark_GT']
 
 directory_paths = shake_directory_paths+focus_directory_paths
-output_file = 'datasets/all.txt'
+output_file = 'datasets/val_all.txt'
 
 image_files_list = []
 gt_image_files_list = []
