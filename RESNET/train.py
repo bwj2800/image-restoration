@@ -1,5 +1,5 @@
 MODEL_NAME = "resnet34_4"
-MODEL_PATH = '../result/model/'+MODEL_NAME+'.h5'
+MODEL_PATH = '../result/resnet/saved_model/'+MODEL_NAME+'.h5'
 DATA_PATH = '../datasets/training/source'
 EPOCH = 100
 BATCH_SIZE = 16

@@ -1,11 +1,11 @@
 MODEL_NAME = "resnet34_2"
-MODEL_PATH = '../result/model/'+MODEL_NAME+'.h5'
+MODEL_PATH = '../result/resnet/saved_model/'+MODEL_NAME+'.h5'
 DATA_PATH = '../datasets/validation/source'
 EPOCH = 100
 BATCH_SIZE = 16
 ACCURACY_RESULT=''
 
-f_acc=open('result/accuracy.txt','a')
+f_acc=open('result/resnet/accuracy.txt','a')
 
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
