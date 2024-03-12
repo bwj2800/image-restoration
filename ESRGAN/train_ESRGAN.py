@@ -11,11 +11,7 @@ Instrustion on running the script:
 import argparse
 import os
 import numpy as np
-import math
-import itertools
-import sys
 
-import torchvision.transforms as transforms
 from torchvision.utils import save_image, make_grid
 
 from torch.utils.data import DataLoader
@@ -29,13 +25,12 @@ import torch.nn.functional as F
 import torch
 torch.cuda.empty_cache()
 
-SAVE_IMAGE_DIR="images/training/saved_models2"
-SAVE_MODEL_DIR="saved_models2"
+SAVE_IMAGE_DIR="../result/esrgan/images/training/all_model"
+SAVE_MODEL_DIR="../result/esrgan/saved_model/all_model"
 os.makedirs(SAVE_IMAGE_DIR, exist_ok=True)
 os.makedirs(SAVE_MODEL_DIR, exist_ok=True)
 
 parser = argparse.ArgumentParser()
-# parser.add_argument("--checkpoint_interval", type=int, default=5000, help="batch interval between model checkpoints")
 parser.add_argument("--residual_blocks", type=int, default=23, help="number of residual blocks in the generator")
 parser.add_argument("--warmup_batches", type=int, default=500, help="number of batches with pixel-wise loss only")
 parser.add_argument("--lambda_adv", type=float, default=5e-3, help="adversarial loss weight")
@@ -43,7 +38,7 @@ parser.add_argument("--lambda_pixel", type=float, default=1e-2, help="pixel-wise
 
 parser.add_argument("--epoch", type=int, default=0, help="epoch to start training from")
 parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
-parser.add_argument("--dataset_txt_path", type=str, default="../datasets/shaken.txt", help="path of the txt file of training dataset")
+parser.add_argument("--dataset_txt_path", type=str, default="../datasets/all.txt", help="path of the txt file of training dataset")
 parser.add_argument("--dataset_root", type=str, default="../datasets/training", help="root path of train dataset")
 parser.add_argument("--batch_size", type=int, default=2, help="size of the batches")
 parser.add_argument("--g_lr", type=float, default=0.0002, help="adam: learning rate of generator")
@@ -79,8 +74,8 @@ criterion_pixel = torch.nn.L1Loss().to(device)
 
 if opt.epoch != 0:
     # Load pretrained models
-    generator.load_state_dict(torch.load("saved_models4/crop/generator_%d.pth" % opt.epoch))
-    discriminator.load_state_dict(torch.load("saved_models4/crop/discriminator_%d.pth" % opt.epoch))
+    generator.load_state_dict(torch.load("../result/esrgan/saved_model/all_model/generator_%d.pth" % opt.epoch))
+    discriminator.load_state_dict(torch.load("../result/esrgan/saved_model/all_model/discriminator_%d.pth" % opt.epoch))
 
 # Optimizers
 optimizer_G = torch.optim.Adam(generator.parameters(), lr=opt.g_lr, betas=(opt.b1, opt.b2))
