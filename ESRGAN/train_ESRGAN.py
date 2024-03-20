@@ -23,10 +23,12 @@ from loader import *
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
+
+from torcheval.metrics.functional import peak_signal_noise_ratio
 torch.cuda.empty_cache()
 
-SAVE_IMAGE_DIR="../result/esrgan/images/training/all_model"
-SAVE_MODEL_DIR="../result/esrgan/saved_model/all_model"
+SAVE_IMAGE_DIR="../result/esrgan/images/training/focus_model2"
+SAVE_MODEL_DIR="../result/esrgan/saved_model/focus_model2"
 os.makedirs(SAVE_IMAGE_DIR, exist_ok=True)
 os.makedirs(SAVE_MODEL_DIR, exist_ok=True)
 
@@ -38,8 +40,10 @@ parser.add_argument("--lambda_pixel", type=float, default=1e-2, help="pixel-wise
 
 parser.add_argument("--epoch", type=int, default=0, help="epoch to start training from")
 parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
-parser.add_argument("--dataset_txt_path", type=str, default="../datasets/all.txt", help="path of the txt file of training dataset")
+parser.add_argument("--dataset_txt_path", type=str, default="../datasets/new_focus.txt", help="path of the txt file of training dataset")
+parser.add_argument("--val_dataset_txt_path", type=str, default="../datasets/new_val_focus.txt", help="path of the txt file of training dataset")
 parser.add_argument("--dataset_root", type=str, default="../datasets/training", help="root path of train dataset")
+parser.add_argument("--val_dataset_root", type=str, default="../datasets/validation", help="root path of train dataset")
 parser.add_argument("--batch_size", type=int, default=2, help="size of the batches")
 parser.add_argument("--g_lr", type=float, default=0.0002, help="adam: learning rate of generator")
 parser.add_argument("--d_lr", type=float, default=0.0002, help="adam: learning rate of discriminator")
@@ -53,7 +57,7 @@ parser.add_argument("--channels", type=int, default=3, help="number of image cha
 parser.add_argument("--sample_interval", type=int, default=200, help="interval between saving image samples")
 parser.add_argument("--checkpoint_interval", type=int, default=1, help="interval between model checkpoints")
 opt = parser.parse_args()
-print(opt)
+# print(opt)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -90,9 +94,18 @@ dataloader = DataLoader(
     num_workers=opt.n_cpu,
 )
 
+val_dataloader = DataLoader(
+    TestImageDataset(root=opt.val_dataset_root, text_file_path = opt.val_dataset_txt_path, shape=(opt.hr_height, opt.hr_width)),
+    batch_size=1,
+    shuffle=True,
+    num_workers=opt.n_cpu,
+)
+
 # ----------
 #  Training
 # ----------
+
+best_psnr=0
 
 for epoch in range(opt.epoch, opt.n_epochs):
     for i, imgs in enumerate(dataloader):
@@ -144,6 +157,8 @@ for epoch in range(opt.epoch, opt.n_epochs):
         # Total generator loss
         loss_G = loss_content + opt.lambda_adv * loss_GAN + opt.lambda_pixel * loss_pixel
 
+        psnr=peak_signal_noise_ratio(imgs_hr, gen_hr)
+
         loss_G.backward()
         optimizer_G.step()
 
@@ -187,9 +202,8 @@ for epoch in range(opt.epoch, opt.n_epochs):
 
         if batches_done % opt.sample_interval == 0:
             # Save image grid with upsampled inputs and ESRGAN outputs
-            print("save")
             imgs_lr = nn.functional.interpolate(imgs_lr, scale_factor=4)
-            img_grid = denormalize(torch.cat((imgs_lr, gen_hr), -1))
+            img_grid = denormalize(torch.cat((imgs_lr, gen_hr, imgs_hr), -1))
             # save_image(img_grid, "images/esrgan/%d.png" % batches_done, nrow=1, normalize=False)
             save_image(img_grid, SAVE_IMAGE_DIR+"/epoch%d_%d.png" % (epoch, batches_done), nrow=1, normalize=False)
 
@@ -197,3 +211,27 @@ for epoch in range(opt.epoch, opt.n_epochs):
             # Save model checkpoints
             torch.save(generator.state_dict(), SAVE_MODEL_DIR+"/generator_%d.pth" % epoch)
             torch.save(discriminator.state_dict(), SAVE_MODEL_DIR+"/discriminator_%d.pth" %epoch)
+    
+
+    #### Evaluation ####
+    psnr_val = []
+
+    with torch.no_grad():
+        for i, imgs in enumerate(val_dataloader):
+            # Configure model input
+            imgs_lr = Variable(imgs["lr"].type(Tensor))
+            imgs_hr = Variable(imgs["gt"].type(Tensor))
+
+            # Generate a high resolution image from low resolution input
+            gen_hr = generator(imgs_lr)
+
+            psnr=peak_signal_noise_ratio(imgs_hr, gen_hr)
+            psnr_val.append(psnr)
+
+        avg_psnr=sum(psnr_val) / len(psnr_val)
+        if avg_psnr > best_psnr:
+            best_psnr = avg_psnr
+            torch.save(generator.state_dict(), SAVE_MODEL_DIR+"/best_generator_%d.pth" % epoch)
+            torch.save(discriminator.state_dict(), SAVE_MODEL_DIR+"/best_discriminator_%d.pth" %epoch)
+
+            print("saved best model at [epoch %d PSNR: %.4f]" % (epoch, avg_psnr))
